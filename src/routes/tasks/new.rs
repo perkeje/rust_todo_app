@@ -9,7 +9,7 @@ pub async fn handle(req: HttpRequest, data: Json<NewTask>, state:web::Data<AppSt
         Some(u) => u,
         None => return HttpResponse::BadRequest().finish()
     };
-    println!("{}",&user.id);
+    
     let content =  &data.content;
 
     match NewTask::create(&state.get_connectinon(),&content,&user.id){

@@ -28,6 +28,7 @@ impl Serialize for Task {
 #[table_name="tasks"]
 pub struct NewTask{
     pub content: String,
+    #[serde(default="String::new")]
     pub user_id: String
 }
 
