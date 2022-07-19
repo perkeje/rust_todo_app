@@ -10,11 +10,11 @@ pub struct AuthUser{
 
 impl AuthUser{
 
-    pub fn authenticate(&self, connection: &diesel::PgConnection)->Result<(User,String),AuthentificationError>{
+    pub fn authenticate(&self, connection: &diesel::PgConnection)->Result<(User,String),AuthError>{
 
         let user = match User::find_by_email(connection, &self.email){
             Ok(user) => user,
-            Err(_) => return Err(AuthentificationError)
+            Err(_) => return Err(AuthError)
         };
 
         match bcrypt::verify(&self.pass,&user.pass){
@@ -24,10 +24,10 @@ impl AuthUser{
                     return Ok((user,token.to_string()))
                 }
                 else{
-                    return Err(AuthentificationError)
+                    return Err(AuthError)
                 }
             }
-            Err(_) => Err(AuthentificationError)
+            Err(_) => Err(AuthError)
         }
 
     }
@@ -36,16 +36,16 @@ impl AuthUser{
 
 
 #[derive(Debug)]
-pub struct AuthentificationError;
+pub struct AuthError;
 
-impl Error for AuthentificationError{
+impl Error for AuthError{
     fn description(&self)->&str{
         "Unauthorized"
     }
 
 }
 
-impl fmt::Display for AuthentificationError{
+impl fmt::Display for AuthError{
     fn fmt(&self,f:&mut fmt::Formatter)->fmt::Result{
         write!(f,"Unauthorized")
     }

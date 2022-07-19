@@ -10,6 +10,7 @@ pub mod models;
 pub mod schema;
 pub mod valid;
 pub mod jwt;
+pub mod middleware;
 
 pub fn config(cfg: &mut web::ServiceConfig){
 
@@ -25,8 +26,9 @@ pub fn config(cfg: &mut web::ServiceConfig){
     );
     cfg.service(
         web::resource("/todos")
-            .route(web::get().to(|| {HttpResponse::Ok()  }))
-            .route(web::post().to(||HttpResponse::Ok()))
+            .route(web::post().to(routes::tasks::new::handle))
+            .route(web::get().to(||HttpResponse::Ok()))
+            .wrap(crate::middleware::auth::AuthGuard)
     );
     cfg.service(
         web::resource("/todos/{id}")
