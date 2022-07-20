@@ -28,12 +28,15 @@ pub fn config(cfg: &mut web::ServiceConfig){
         web::resource("/tasks")
             .route(web::post().to(routes::tasks::new::handle))
             .route(web::get().to(routes::tasks::user_tasks::handle))
+            .route(web::delete().to(routes::tasks::delete_all::handle))
             .wrap(crate::middleware::auth::AuthGuard)
     );
     cfg.service(
         web::resource("/tasks/{id}")
-            .route(web::post().to(|| {HttpResponse::Ok()  }))
+            .route(web::get().to(routes::tasks::get_specific::handle))
             .route(web::put().to(||HttpResponse::Ok()))
+            .route(web::delete().to(routes::tasks::delete_specific::handle))
+            .wrap(crate::middleware::auth::AuthGuard)
     );
 
 }

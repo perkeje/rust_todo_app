@@ -30,9 +30,24 @@ impl Task {
    
     pub fn get_all_tasks(user_id:&str, connection: &PgConnection)-> Result<Vec<Task>,result::Error>{
         tasks::table
-        .filter(tasks::user_id.eq(user_id))
+        .filter(tasks::user_id.eq(&user_id))
         .load::<Task>(connection)
    }
+
+   pub fn get_task_by_id(task_id:&str,user_id:&str, connection: &PgConnection)->Result<Task, result::Error>{
+        tasks::table
+        .filter(tasks::user_id.eq(&user_id))
+        .filter(tasks::id.eq(&task_id))
+        .first::<Task>(connection)
+   }
+
+   pub fn delete_users_all(user_id:&str, connection: &PgConnection)-> Result<usize,result::Error>{
+    diesel::delete(tasks::table.filter(tasks::user_id.eq(&user_id))).execute(connection)
+    }
+
+    pub fn delete_specific(task_id:&str,user_id:&str, connection: &PgConnection)-> Result<usize,result::Error>{
+        diesel::delete(tasks::table.filter(tasks::user_id.eq(&user_id)).filter(tasks::id.eq(&task_id))).execute(connection)
+        }
 }
 
 

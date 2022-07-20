@@ -30,10 +30,7 @@ impl Serialize for User{
 
 impl User{
     pub fn find_by_email(connection: &PgConnection, email:&str) -> Result<User,result::Error> {
-        match users::table.filter(users::email.eq(email)).first::<User>(connection){
-            Ok(user) => Ok(user),
-            Err(err) => Err(err)
-        }
+        users::table.filter(users::email.eq(email)).first::<User>(connection)
     }
 
     pub fn generate_jwt(&self)->String{
