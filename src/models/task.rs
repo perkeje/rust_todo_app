@@ -27,12 +27,50 @@ impl Serialize for Task {
 }
 
 impl Task {
-   
-    pub fn get_all_tasks(user_id:&str, connection: &PgConnection)-> Result<Vec<Task>,result::Error>{
-        tasks::table
+
+    pub fn get_tasks_paginated(page:u32,per_page:u32, user_id:&str,done:bool ,connection: &PgConnection)->Result<super::pagination::Paginated<Task>,result::Error>{
+        let mut last_page=1;
+        let mut data:Vec<Task> = vec![];
+
+        let total =  tasks::table
         .filter(tasks::user_id.eq(&user_id))
-        .load::<Task>(connection)
-   }
+        .count()
+        .get_result(connection);
+
+        let total = match total {
+            Ok(count) => count,
+            Err(_) => {
+              0
+            }
+          };
+
+          if total !=0 {
+            last_page = total as u32/per_page;
+            let skip = (page-1) * per_page;
+            
+            data = tasks::table
+            .filter(tasks::user_id.eq(user_id))
+            .filter(tasks::done.eq(done))
+            .offset(skip as i64)
+            .limit(per_page as i64)
+            .load::<Task>(connection)?;
+        }
+            
+            Ok(super::pagination::Paginated{
+                page: page,
+                per_page: per_page,
+                total: total as u32,
+                last_page,
+                data
+            })
+
+    }
+   
+//     pub fn get_all_tasks(user_id:&str, connection: &PgConnection)-> Result<Vec<Task>,result::Error>{
+//         tasks::table
+//         .filter(tasks::user_id.eq(&user_id))
+//         .load::<Task>(connection)
+//    }
 
    pub fn get_task_by_id(task_id:&str,user_id:&str, connection: &PgConnection)->Result<Task, result::Error>{
         tasks::table
