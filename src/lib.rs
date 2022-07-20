@@ -25,13 +25,13 @@ pub fn config(cfg: &mut web::ServiceConfig){
         web::resource("/register").route(web::post().to(routes::auth::register::handle))
     );
     cfg.service(
-        web::resource("/todos")
+        web::resource("/tasks")
             .route(web::post().to(routes::tasks::new::handle))
-            .route(web::get().to(||HttpResponse::Ok()))
+            .route(web::get().to(routes::tasks::user_tasks::handle))
             .wrap(crate::middleware::auth::AuthGuard)
     );
     cfg.service(
-        web::resource("/todos/{id}")
+        web::resource("/tasks/{id}")
             .route(web::post().to(|| {HttpResponse::Ok()  }))
             .route(web::put().to(||HttpResponse::Ok()))
     );

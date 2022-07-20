@@ -1,5 +1,7 @@
 use diesel::{PgConnection, result};
+use crate::diesel::QueryDsl;
 use crate::diesel::RunQueryDsl;
+use crate::diesel::ExpressionMethods;
 use serde::{Serialize, Deserialize,Serializer};
 use serde::ser::SerializeStruct;
 use crate::schema::tasks;
@@ -23,6 +25,16 @@ impl Serialize for Task {
         state.end()
     }
 }
+
+impl Task {
+   
+    pub fn get_all_tasks(user_id:&str, connection: &PgConnection)-> Result<Vec<Task>,result::Error>{
+        tasks::table
+        .filter(tasks::user_id.eq(user_id))
+        .load::<Task>(connection)
+   }
+}
+
 
 #[derive(Queryable,Insertable,Debug,Deserialize)]
 #[table_name="tasks"]

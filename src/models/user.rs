@@ -7,7 +7,8 @@ use serde;
 use crate::diesel::QueryDsl;
 use crate::diesel::RunQueryDsl;
 use crate::diesel::ExpressionMethods;
-use crate::schema::users;
+use crate::schema::{users};
+
 
 #[derive(Queryable, Debug)]
 pub struct User{
