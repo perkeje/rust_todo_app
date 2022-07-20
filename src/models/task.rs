@@ -1,7 +1,7 @@
 use diesel::{PgConnection, result};
-use crate::diesel::QueryDsl;
-use crate::diesel::RunQueryDsl;
-use crate::diesel::ExpressionMethods;
+use diesel::QueryDsl;
+use diesel::RunQueryDsl;
+use diesel::ExpressionMethods;
 use serde::{Serialize, Deserialize,Serializer};
 use serde::ser::SerializeStruct;
 use crate::schema::tasks;
@@ -47,8 +47,15 @@ impl Task {
 
     pub fn delete_specific(task_id:&str,user_id:&str, connection: &PgConnection)-> Result<usize,result::Error>{
         diesel::delete(tasks::table.filter(tasks::user_id.eq(&user_id)).filter(tasks::id.eq(&task_id))).execute(connection)
-        }
+    }
+
+    pub fn update_task(task_id:&str,user_id:&str, connection: &PgConnection, content: &str)->Result<Task, result::Error>{
+        diesel::update(tasks::table.find(&task_id).filter(tasks::user_id.eq(&user_id)))
+            .set(tasks::content.eq(&content))
+            .get_result::<Task>(connection)
+   }
 }
+
 
 
 #[derive(Queryable,Insertable,Debug,Deserialize)]

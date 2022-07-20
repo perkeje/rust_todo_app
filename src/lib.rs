@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate diesel;
 
-use actix_web::{ web, HttpResponse};
+use actix_web::{ web::{self}, HttpResponse};
 
 
 pub mod state;
@@ -34,8 +34,14 @@ pub fn config(cfg: &mut web::ServiceConfig){
     cfg.service(
         web::resource("/tasks/{id}")
             .route(web::get().to(routes::tasks::get_specific::handle))
-            .route(web::put().to(||HttpResponse::Ok()))
+            .route(web::put().to(routes::tasks::update::handle))
             .route(web::delete().to(routes::tasks::delete_specific::handle))
+            .wrap(crate::middleware::auth::AuthGuard)
+    );
+
+    cfg.service(
+        web::resource("/tasks/{id}/check")
+            .route(web::put().to(routes::tasks::update::handle))
             .wrap(crate::middleware::auth::AuthGuard)
     );
 
