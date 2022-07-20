@@ -54,6 +54,17 @@ impl Task {
             .set(tasks::content.eq(&content))
             .get_result::<Task>(connection)
    }
+
+   pub fn change_done(task_id:&str,user_id:&str, connection: &PgConnection)->Result<Task, result::Error>{
+        let task = match Task::get_task_by_id(&task_id,&user_id,&connection) {
+            Ok(task) =>task,
+            Err(err) => return Err(err)
+        };
+        let reverse_done = !task.done;
+        diesel::update(tasks::table.find(&task_id).filter(tasks::user_id.eq(&user_id)))
+        .set(tasks::done.eq(reverse_done))
+        .get_result::<Task>(connection)
+   }
 }
 
 

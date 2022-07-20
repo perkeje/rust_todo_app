@@ -1,8 +1,7 @@
 #[macro_use]
 extern crate diesel;
-
-use actix_web::{ web::{self}, HttpResponse};
-
+use actix_cors::Cors;
+use actix_web::{ web::{self}, HttpResponse, http, HttpServer, App};
 
 pub mod state;
 pub mod routes;
@@ -12,7 +11,21 @@ pub mod valid;
 pub mod jwt;
 pub mod middleware;
 
-pub fn config(cfg: &mut web::ServiceConfig){
+
+pub async fn start()->std::io::Result<()>{
+    HttpServer::new(|| {
+        App::new()
+        .app_data(web::Data::new(crate::state::app::initialize_pool()))
+        .wrap(setup_cors())
+        .configure(crate::config)
+    })
+    .workers(4)
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}
+
+fn config(cfg: &mut web::ServiceConfig){
 
     cfg.service(
         web::resource("/").route(web::get().to(|| {HttpResponse::Ok()  }))
@@ -41,9 +54,19 @@ pub fn config(cfg: &mut web::ServiceConfig){
 
     cfg.service(
         web::resource("/tasks/{id}/check")
-            .route(web::put().to(routes::tasks::update::handle))
+            .route(web::put().to(routes::tasks::check::handle))
             .wrap(crate::middleware::auth::AuthGuard)
     );
-
+    
 }
 
+
+
+fn setup_cors() -> Cors{
+    Cors::default()
+        .send_wildcard()
+        .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+        .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+        .allowed_header(http::header::CONTENT_TYPE)
+        .max_age(3600)
+}
